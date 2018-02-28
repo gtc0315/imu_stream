@@ -27,6 +27,14 @@
             android:text="(⊙_⊙)" />
 
         <TextView
+            android:id="@+id/timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="60dp"
+            android:text="ts:" />
+
+        <TextView
             android:id="@+id/hrm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
