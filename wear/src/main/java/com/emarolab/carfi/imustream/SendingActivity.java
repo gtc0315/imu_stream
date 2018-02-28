@@ -25,13 +25,14 @@ import java.util.TimerTask;
 
 public class SendingActivity extends WearableActivity implements SensorEventListener {
 
-    private vectorMessage accMsg = new vectorMessage(), gyroMsg = new vectorMessage();
-    private float[] last_acc = new float[3], last_gyro = new float[3];
+    private vectorMessage stepMsg = new vectorMessage(), hrmMsg = new vectorMessage();
+    private float[] last_hrm = new float[1];
+    private float[] last_step = new float[1];
 
 
-    private TextView dataAcc, dataGyro;
+    private TextView dataStep, dataHRM;
     private SensorManager senSensorManager;
-    private Sensor senAccelerometer, senGyroscope;
+    private Sensor senStepCounter, senHRM;
     private Timer myTimer;
 
     private long lastUpdate = 0;
@@ -53,20 +54,20 @@ public class SendingActivity extends WearableActivity implements SensorEventList
         // Enables Always-on
         setAmbientEnabled();
 
-        accMsg.setTopic("sensors/accelerometer");
-        gyroMsg.setTopic("sensors/gyroscope");
+        stepMsg.setTopic("sensors/stepcounter");
+        hrmMsg.setTopic("sensors/heartrate");
 
         senSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-        senAccelerometer = senSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        senSensorManager.registerListener(this, senAccelerometer , SensorManager.SENSOR_DELAY_GAME);
+        senStepCounter = senSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        senSensorManager.registerListener(this, senStepCounter , SensorManager.SENSOR_DELAY_GAME);
 
-        senGyroscope = senSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        senSensorManager.registerListener(this, senGyroscope , SensorManager.SENSOR_DELAY_GAME);
+        senHRM = senSensorManager.getDefaultSensor(Sensor.TYPE_HEART_RATE);
+        senSensorManager.registerListener(this, senHRM , SensorManager.SENSOR_DELAY_GAME);
 
 
-        dataAcc = (TextView) findViewById(R.id.acc);
-        dataGyro = (TextView) findViewById(R.id.gyro);
+        dataStep = (TextView) findViewById(R.id.step);
+        dataHRM = (TextView) findViewById(R.id.hrm);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -102,19 +103,19 @@ public class SendingActivity extends WearableActivity implements SensorEventList
     {
         if (sensorUpdate) {
             sensorUpdate = false;
-            syncSampleDataItem(accMsg,gyroMsg);
+            syncSampleDataItem(stepMsg,hrmMsg);
         }
     }
 
-     private void syncSampleDataItem(final vectorMessage msg_acc, final vectorMessage msg_gyro) {
+     private void syncSampleDataItem(final vectorMessage msg_step, final vectorMessage msg_hrm) {
         if (mGoogleApiClient == null)
             return;
 
         final PutDataMapRequest putRequest = PutDataMapRequest.create("/IMU");
         final DataMap map = putRequest.getDataMap();
 
-        map.putFloatArray(msg_acc.getTopic(), msg_acc.getData());
-        map.putFloatArray(msg_gyro.getTopic(), msg_gyro.getData());
+        map.putFloatArray(msg_step.getTopic(), msg_step.getData());
+        map.putFloatArray(msg_hrm.getTopic(), msg_hrm.getData());
         map.putLong("sensors/time", System.currentTimeMillis());
         PutDataRequest request = putRequest.asPutDataRequest();
         request.setUrgent();
@@ -132,22 +133,18 @@ public class SendingActivity extends WearableActivity implements SensorEventList
     public void onSensorChanged(SensorEvent sensorEvent) {
         Sensor mySensor = sensorEvent.sensor;
 
-        if (mySensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            last_gyro[0] = ((int) (sensorEvent.values[0] * precision)) / precision;
-            last_gyro[1] = ((int) (sensorEvent.values[1] * precision)) / precision;
-            last_gyro[2] = ((int) (sensorEvent.values[2] * precision)) / precision;
+        if (mySensor.getType() == Sensor.TYPE_HEART_RATE) {
+            last_hrm[0] = sensorEvent.values[0];
 
-            dataGyro.setText("gyro: " + last_gyro[0] + " " + last_gyro[0] + " " + last_gyro[2]);
-            gyroMsg.setData(last_gyro);
+            dataHRM.setText("hrm: " + last_hrm[0]);
+            hrmMsg.setData(last_hrm);
         }
 
-        if (mySensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            last_acc[0] = ((int) (sensorEvent.values[0] * precision)) / precision;
-            last_acc[1] = ((int) (sensorEvent.values[1] * precision)) / precision;
-            last_acc[2] = ((int) (sensorEvent.values[2] * precision)) / precision;
+        if (mySensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            last_step[0] = sensorEvent.values[0];
 
-            dataAcc.setText("acc: " + last_acc[0] + " " + last_acc[1] + " " + last_acc[2]);
-            accMsg.setData(last_acc);
+            dataStep.setText("step: " + last_step[0]);
+            stepMsg.setData(last_step);
         }
     }
 
