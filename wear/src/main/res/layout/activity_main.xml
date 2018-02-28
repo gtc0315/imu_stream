@@ -25,7 +25,7 @@
             android:layout_marginRight="30dp"
             android:layout_marginTop="50dp"
             android:onClick="startStreaming"
-            android:text="Send" />
+            android:text="(⊙.⊙)" />
     </FrameLayout>
 </android.support.wear.widget.BoxInsetLayout>
 
