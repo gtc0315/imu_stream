@@ -22,6 +22,9 @@ import com.google.android.gms.wearable.Wearable;
 
 import java.util.Timer;
 import java.util.TimerTask;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SendingActivity extends WearableActivity implements SensorEventListener {
 
@@ -30,7 +33,7 @@ public class SendingActivity extends WearableActivity implements SensorEventList
     private float[] last_step = new float[1];
 
 
-    private TextView dataStep, dataHRM;
+    private TextView dataStep, dataHRM, dataTS;
     private SensorManager senSensorManager;
     private Sensor senStepCounter, senHRM;
     private Timer myTimer;
@@ -39,6 +42,8 @@ public class SendingActivity extends WearableActivity implements SensorEventList
 
     private float precision = 1000;
     private int period = 20;
+
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     private boolean sensorUpdate = true;
 
@@ -68,6 +73,7 @@ public class SendingActivity extends WearableActivity implements SensorEventList
 
         dataStep = (TextView) findViewById(R.id.step);
         dataHRM = (TextView) findViewById(R.id.hrm);
+        dataTS = (TextView) findViewById(R.id.timestamp);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
@@ -146,6 +152,8 @@ public class SendingActivity extends WearableActivity implements SensorEventList
             dataStep.setText("step: " + last_step[0]);
             stepMsg.setData(last_step);
         }
+
+        dataTS.setText("ts: " + dateFormat.format(new Date()));
     }
 
     @Override
