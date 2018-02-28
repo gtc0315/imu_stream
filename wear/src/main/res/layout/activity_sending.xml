@@ -24,23 +24,23 @@
             android:layout_marginRight="30dp"
             android:layout_marginTop="90dp"
             android:onClick="stopStreaming"
-            android:text="Stop" />
+            android:text="(⊙_⊙)" />
 
         <TextView
-            android:id="@+id/gyro"
+            android:id="@+id/hrm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="40dp"
-            android:text="gyro:" />
+            android:text="hrm:" />
 
         <TextView
-            android:id="@+id/acc"
+            android:id="@+id/step"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="20dp"
-            android:text="acc:" />
+            android:text="step:" />
     </FrameLayout>
 </android.support.wear.widget.BoxInsetLayout>
 
