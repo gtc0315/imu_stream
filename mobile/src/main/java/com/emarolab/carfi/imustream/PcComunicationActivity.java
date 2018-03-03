@@ -17,15 +17,19 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.text.DateFormat;
 import java.util.Timer;
 
 public class PcComunicationActivity extends AppCompatActivity {
-    public TextView AccX, AccY, AccZ, VelX, VelY, VelZ, ipOut, portOut, textConnection;
+    public TextView Step, HRM, TS, ipOut, portOut, textConnection;
     private Button p1_button;
     private boolean pause_flag = false;
     private BroadcastReceiver receiver;
     private Timer myTimer;
     private MqttHelper mqttHelper;
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,13 +50,9 @@ public class PcComunicationActivity extends AppCompatActivity {
         portOut.setText(mqtt_port);
         textConnection = (TextView) findViewById(R.id.connectionS);
 
-        AccX = (TextView) findViewById(R.id.accX);
-        AccY = (TextView) findViewById(R.id.accY);
-        AccZ = (TextView) findViewById(R.id.accZ);
-
-        VelX = (TextView) findViewById(R.id.velX);
-        VelY = (TextView) findViewById(R.id.velY);
-        VelZ = (TextView) findViewById(R.id.velZ);
+        Step = (TextView) findViewById(R.id.step);
+        HRM = (TextView) findViewById(R.id.hrm);
+        TS = (TextView) findViewById(R.id.ts);
 
         startMqtt(mqtt_ip,mqtt_port,mqtt_user,mqtt_password);
 
@@ -64,10 +64,11 @@ public class PcComunicationActivity extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 Bundle bundle = intent.getExtras();
                 if (bundle != null) {
-                    float[] acc = bundle.getFloatArray("acceleration");
-                    float[] vel = bundle.getFloatArray("velocity");
-                    String string = "acc;" + acc[0] + ";" + acc[1] + ";" + acc[2] + ";gyro;" + vel[0] + ";" + vel[0] + ";" + vel[2];
-                    imuVisualization(acc,vel);
+                    float[] step = bundle.getFloatArray("stepcount");
+                    float[] hrm = bundle.getFloatArray("heartrate");
+                    long time = bundle.getLong("timestamp");
+                    String string = "step;" + step[0] + ";hrm;" + hrm[0] +";ts;"+dateFormat.format(new Date(time));
+                    imuVisualization(step,hrm,time);
                     mqttHelper.onDataReceived(string);
                     connectionCheck();
                 }
@@ -88,14 +89,11 @@ public class PcComunicationActivity extends AppCompatActivity {
         }
     }
 
-    private void imuVisualization(float[] acc, float[] vel){
-        AccX.setText(String.valueOf(acc[0]));
-        AccY.setText(String.valueOf(acc[1]));
-        AccZ.setText(String.valueOf(acc[2]));
+    private void imuVisualization(float[] step, float[] hrm, long ts){
+        Step.setText(String.valueOf(step[0]));
+        HRM.setText(String.valueOf(hrm[0]));
+        TS.setText(dateFormat.format(new Date(ts)));
 
-        VelX.setText(String.valueOf(vel[0]));
-        VelY.setText(String.valueOf(vel[1]));
-        VelZ.setText(String.valueOf(vel[2]));
     }
 
     @Override

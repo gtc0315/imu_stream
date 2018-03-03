@@ -31,7 +31,7 @@ public class SendingActivity extends WearableActivity implements SensorEventList
     private vectorMessage stepMsg = new vectorMessage(), hrmMsg = new vectorMessage();
     private float[] last_hrm = new float[1];
     private float[] last_step = new float[1];
-
+    private long last_ts = System.currentTimeMillis();
 
     private TextView dataStep, dataHRM, dataTS;
     private SensorManager senSensorManager;
@@ -113,7 +113,7 @@ public class SendingActivity extends WearableActivity implements SensorEventList
         }
     }
 
-     private void syncSampleDataItem(final vectorMessage msg_step, final vectorMessage msg_hrm) {
+    private void syncSampleDataItem(final vectorMessage msg_step, final vectorMessage msg_hrm) {
         if (mGoogleApiClient == null)
             return;
 
@@ -122,7 +122,8 @@ public class SendingActivity extends WearableActivity implements SensorEventList
 
         map.putFloatArray(msg_step.getTopic(), msg_step.getData());
         map.putFloatArray(msg_hrm.getTopic(), msg_hrm.getData());
-        map.putLong("sensors/time", System.currentTimeMillis());
+        last_ts = System.currentTimeMillis();
+        map.putLong("sensors/timestamp", last_ts);
         PutDataRequest request = putRequest.asPutDataRequest();
         request.setUrgent();
         Wearable.DataApi.putDataItem(mGoogleApiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
@@ -153,7 +154,7 @@ public class SendingActivity extends WearableActivity implements SensorEventList
             stepMsg.setData(last_step);
         }
 
-        dataTS.setText("ts: " + dateFormat.format(new Date()));
+        dataTS.setText("ts: " + dateFormat.format(new Date(last_ts)));
     }
 
     @Override

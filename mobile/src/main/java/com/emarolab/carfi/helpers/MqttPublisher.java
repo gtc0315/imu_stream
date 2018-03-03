@@ -37,7 +37,7 @@ public class MqttPublisher implements Runnable {
                 mqttMessage.setPayload(m.getBytes());
 
                 try {
-                    mqttAndroidClient.publish("sensors/imu", mqttMessage);
+                    mqttAndroidClient.publish("tAxiY7W4P58QH5Oq/sensors/watch", mqttMessage);
                 } catch (MqttException e) {
                     e.printStackTrace();
                 }

@@ -30,14 +30,15 @@ public class DataLayerListenerService extends WearableListenerService {
                 final DataMap map = DataMapItem.fromDataItem(event.getDataItem()).getDataMap();
 
 
-                float[] acc = map.getFloatArray("sensors/accelerometer");
-                float[] gyro = map.getFloatArray("sensors/gyroscope");
-                long time = map.getLong("sensors/time");
+                float[] step = map.getFloatArray("sensors/stepcounter");
+                float[] hrm = map.getFloatArray("sensors/heartrate");
+                long time = map.getLong("sensors/timestamp");
 
                 Intent intent = new Intent();
                 intent.setAction("com.example.Broadcast");
-                intent.putExtra("acceleration", acc);
-                intent.putExtra("velocity", gyro);
+                intent.putExtra("stepcount", step);
+                intent.putExtra("heartrate", hrm);
+                intent.putExtra("timestamp",time);
                 sendBroadcast(intent);
             }
         }
