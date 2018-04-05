@@ -40,16 +40,19 @@ public class SendingActivity extends WearableActivity implements SensorEventList
 
     private long lastUpdate = 0;
 
+    private long driftStart = 0;
     private float precision = 1000;
     private int period = 20;
 
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private DateFormat dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss:SSS");
 
     private boolean sensorUpdate = true;
 
     private String msg_intertial;
 
     private GoogleApiClient mGoogleApiClient;
+
+    private boolean drift_flag = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +127,13 @@ public class SendingActivity extends WearableActivity implements SensorEventList
         map.putFloatArray(msg_hrm.getTopic(), msg_hrm.getData());
         last_ts = System.currentTimeMillis();
         map.putLong("sensors/timestamp", last_ts);
+        if (drift_flag){
+            driftStart = last_ts;
+            drift_flag = false;
+            map.putLong("sensors/driftStart",driftStart);
+        }else{
+            map.putLong("sensors/driftStart",0);
+        }
         PutDataRequest request = putRequest.asPutDataRequest();
         request.setUrgent();
         Wearable.DataApi.putDataItem(mGoogleApiClient, request).setResultCallback(new ResultCallback<DataApi.DataItemResult>() {
@@ -168,5 +178,10 @@ public class SendingActivity extends WearableActivity implements SensorEventList
         finish();
         startActivity(intent);
 
+    }
+
+
+    public void driftButton(View view) {
+        drift_flag = true;
     }
 }

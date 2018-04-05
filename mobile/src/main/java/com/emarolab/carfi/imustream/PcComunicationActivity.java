@@ -23,13 +23,15 @@ import java.text.DateFormat;
 import java.util.Timer;
 
 public class PcComunicationActivity extends AppCompatActivity {
-    public TextView Step, HRM, TS, ipOut, portOut, textConnection;
+    public TextView Step, HRM, TS, TS2,TS3, ipOut, portOut, textConnection;
     private Button p1_button;
     private boolean pause_flag = false;
     private BroadcastReceiver receiver;
     private Timer myTimer;
     private MqttHelper mqttHelper;
-    private DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private DateFormat dateFormat = new SimpleDateFormat("MM/dd HH:mm:ss:SSS");
+    private long driftStart_phone = 0;
+    private long driftStart_watch = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,8 @@ public class PcComunicationActivity extends AppCompatActivity {
         Step = (TextView) findViewById(R.id.step);
         HRM = (TextView) findViewById(R.id.hrm);
         TS = (TextView) findViewById(R.id.ts);
+        TS2 = (TextView) findViewById(R.id.ts2);
+        TS3 = (TextView) findViewById(R.id.ts3);
 
         startMqtt(mqtt_ip,mqtt_port,mqtt_user,mqtt_password);
 
@@ -67,8 +71,13 @@ public class PcComunicationActivity extends AppCompatActivity {
                     float[] step = bundle.getFloatArray("stepcount");
                     float[] hrm = bundle.getFloatArray("heartrate");
                     long time = bundle.getLong("timestamp");
+                    long tmp = bundle.getLong("driftStart");
+                    if (tmp!=0){
+                        driftStart_phone = System.currentTimeMillis();
+                        driftStart_watch = tmp;
+                    }
                     String string = "step;" + step[0] + ";hrm;" + hrm[0] +";ts;"+dateFormat.format(new Date(time));
-                    imuVisualization(step,hrm,time);
+                    imuVisualization(step,hrm,time,driftStart_watch,driftStart_phone);
                     mqttHelper.onDataReceived(string);
                     connectionCheck();
                 }
@@ -89,10 +98,12 @@ public class PcComunicationActivity extends AppCompatActivity {
         }
     }
 
-    private void imuVisualization(float[] step, float[] hrm, long ts){
+    private void imuVisualization(float[] step, float[] hrm, long ts,long driftStart_watch, long driftStart_phone){
         Step.setText(String.valueOf(step[0]));
         HRM.setText(String.valueOf(hrm[0]));
         TS.setText(dateFormat.format(new Date(ts)));
+        TS2.setText(Long.toString(driftStart_watch));
+        TS3.setText(Long.toString(driftStart_phone));
 
     }
 
